@@ -39,6 +39,7 @@ router.post('/login', (req, res, next) => {
       res.statusCode = 401;
       res.setHeader('Content-Type', 'application/json');
       res.json({success: false, status: 'Login Unsuccessful!', err: info});
+      return;
     }
     req.logIn(user, (err) => {
       if(err){
@@ -53,6 +54,12 @@ router.post('/login', (req, res, next) => {
       res.json({success: true, status: 'Login Successful!', token: token});
     });
   })(req, res, next);
+});
+
+router.get('/verify', auth.verifyUser, (req, res, next) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'application/json');
+  res.json({valid: true});
 });
 
 module.exports = router;
