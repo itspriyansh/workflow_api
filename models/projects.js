@@ -94,6 +94,10 @@ const Project = mongoose.Schema({
         type: String,
         required: true
     },
+    machine: {
+        type: String,
+        required: true
+    },
     mdsno: {
         type: String,
         required: true
