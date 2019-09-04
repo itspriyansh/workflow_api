@@ -1,7 +1,7 @@
 # workflow_api
 Project Workflow Management API
 
-Package Manager 'yarn' is neede to install dependencies of the API.
+Package Manager 'yarn' is needed to install dependencies of the API.
 To install yarn, run 'npm i -g yarn'
 
 To download project dependencies, run 'yarn install'
