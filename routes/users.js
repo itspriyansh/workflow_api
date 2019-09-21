@@ -32,6 +32,24 @@ router.post('/signup', (req, res) => {
   });
 });
 
+router.post('/adduser', auth.verifyUser, auth.verifyAction('upload'), (req, res) => {
+  if(!req.body.lastname){
+    req.body.lastname=''
+  }
+  User.register(new User({username: req.body.email, usertype: req.body.usertype, firstname: req.body.firstname, lastname: req.body.lastname}),
+  req.body.password, (err, user) => {
+    if(err){
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: false, status: err});
+    }else{
+      res.statusCode=200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: true, status: 'Registration Successful!', token: auth.getToken({_id: user._id})});
+    }
+  });
+});
+
 router.post('/login', (req, res, next) => {
   passport.authenticate('local', (err, user, info) => {
     if(err) return next(err);
