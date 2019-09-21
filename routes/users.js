@@ -23,7 +23,7 @@ router.post('/signup', (req, res) => {
     if(err){
       res.statusCode = 500;
       res.setHeader('Content-Type', 'application/json');
-      res.json(err);
+      res.json({success: false, status: err});
     }else{
       res.statusCode=200;
       res.setHeader('Content-Type', 'application/json');
@@ -51,7 +51,7 @@ router.post('/login', (req, res, next) => {
       var token = auth.getToken({_id: user._id});
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
-      res.json({success: true, status: 'Login Successful!', token: token});
+      res.json({success: true, status: 'Login Successful!', token: token, user: user});
     });
   })(req, res, next);
 });
