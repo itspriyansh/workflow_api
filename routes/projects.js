@@ -3,8 +3,6 @@ var Projects = require('../models/projects');
 var bodyParser = require('body-parser');
 var auth = require('../authenticate');
 var User = require('../models/users');
-var upload = require('./fileUpload');
-var fs = require('fs');
 
 var router = express.Router();
 var userPopulate = 'name usertype username firstname lastname';
@@ -20,7 +18,6 @@ router.route('/')
     .populate({path: 'members', select: userPopulate})
     .populate({path: 'tasks.comments.author', select: userPopulate})
     .populate({path: 'tasks.members', select: userPopulate})
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
     .then((projects) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'application/json');
@@ -32,7 +29,7 @@ router.route('/')
     }
     let members=[];
     if(req.body.start_date!=undefined){
-        for(let i=0;i<req.body.tasks.length;i++){            
+        for(let i=0;i<req.body.tasks.length;i++){
             if(req.body.tasks[i].start_date==undefined){
                 req.body.tasks[i].start_date = req.body.start_date;
             }
@@ -75,7 +72,6 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
     .populate({path: 'members', select: userPopulate})
     .populate({path: 'tasks.comments.author', select: userPopulate})
     .populate({path: 'tasks.members', select: userPopulate})
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
     .then((project) => {
         res.statusCode=200;
         res.setHeader('Content-Type', 'application/json');
@@ -102,7 +98,7 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
                 project.fat_date = req.body.fat_date;
             }
             let members=[];
-            for(let i=0;i<req.body.tasks.length;i++){            
+            for(let i=0;i<req.body.tasks.length;i++){
                 if(req.body.tasks[i].start_date==undefined){
                     req.body.tasks[i].start_date = project.start_date;
                 }
@@ -134,7 +130,6 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
                 .populate({path: 'members', select: userPopulate})
                 .populate({path: 'tasks.comments.author', select: userPopulate})
                 .populate({path: 'tasks.members', select: userPopulate})
-                .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
                 .then((project) => {
                     res.statusCode=200;
                     res.setHeader('Content-Type', 'application/json');
@@ -150,19 +145,7 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
     if(!req.user.type.upload){
         condition.members = req.user._id;;
     }
-    Projects.findOne(condition).then((project) => {
-        if(project){
-            project.tasks.forEach(task => {
-                task.files.forEach(file => {
-                    fs.unlink(file.path, (err) => {
-                        if(err) console.log(err);
-                    });
-                });
-            });
-            return project.delete();
-        }
-        return;
-    }).then(() => {
+    Projects.findOneAndDelete(condition).then(() => {
         res.statusCode=200;
         res.setHeader('Content-Type', 'application/json');
         res.json({success: true, message: 'Successfully deleted project '+req.params.projectId})
@@ -180,7 +163,6 @@ router.route('/:projectId/tasks')
     Projects.findOne(condition)
     .populate({path: 'tasks.comments.author', select: userPopulate})
     .populate({path: 'tasks.members', select: userPopulate})
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
     .then((project) => {
         if(!project){
             let err = new Error('Project '+req.params.projectId+' not found!');
@@ -207,7 +189,7 @@ router.route('/:projectId/tasks')
             next(err);
         }else{
             let members=[];
-            for(let i=0;i<req.body.tasks.length;i++){            
+            for(let i=0;i<req.body.tasks.length;i++){
                 if(req.body.tasks[i].start_date==undefined){
                     req.body.tasks[i].start_date = project.start_date;
                 }
@@ -237,8 +219,7 @@ router.route('/:projectId/tasks')
             }).then((project) => {
                 return Projects.findById(project._id)
                 .populate({path: 'tasks.comments.author', select: userPopulate})
-                .populate({path: 'tasks.members', select: userPopulate})
-                .populate({path: 'tasks.files.uploadedBy', select: userPopulate});
+                .populate({path: 'tasks.members', select: userPopulate});
             }).then((project) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
@@ -259,7 +240,6 @@ router.route('/:projectId/tasks/:taskId')
     Projects.findOne(condition)
     .populate({path: 'tasks.comments.author', select: userPopulate})
     .populate({path: 'tasks.members', select: userPopulate})
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
     .then((project) => {
         if(!project){
             let err = new Error('Project '+req.params.projectId+' not found!');
@@ -303,8 +283,7 @@ router.route('/:projectId/tasks/:taskId')
             project.save().then((project) => {
                 return Projects.findById(project._id)
                 .populate({path: 'tasks.comments.author', select: userPopulate})
-                .populate({path: 'tasks.members', select: userPopulate})
-                .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
+                .populate({path: 'tasks.members', select: userPopulate});
             }).then((project) => {
                 res.statusCode=200;
                 res.setHeader('Content-Type', 'application/json');
@@ -330,11 +309,6 @@ router.route('/:projectId/tasks/:taskId')
             for(let i=0;i<project.tasks.length;i++){
                 if(project.tasks[i]._id==req.params.taskId){
                     done=true;
-                    project.tasks[i].forEach(file => {
-                        fs.unlink(file.path, (err) => {
-                            if(err) console.log(err);
-                        });
-                    });
                     project.tasks.splice(i,1);
                     break;
                 }
@@ -351,154 +325,6 @@ router.route('/:projectId/tasks/:taskId')
                 res.json({success: true, message: 'Task '+req.params.taskId+' in Project '+req.params.projectId+' deleted successfully!'});
             },(err) => next(err)).catch((err) => next(err));
         }
-    },(err) => next(err)).catch((err) => next(err));
-});
-
-router.route('/:projectId/tasks/:taskId/files')
-.get(auth.verifyUser, (req, res, next) => {
-    let condition = {
-        _id: req.params.projectId
-    };
-    Projects.findOne(condition)
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
-    .then((project) => {
-        if(!project){
-            let err = new Error('Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }else{
-            res.statusCode=200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(project.tasks.filter(task => task._id==req.params.taskId)[0].files);
-        }
-    },(err) => next(err)).catch((err) => next(err));
-}).post(auth.verifyUser, auth.verifyAction('upload'), upload.single('file'), (req, res, next) => {
-    let condition = {
-        _id: req.params.projectId
-    };
-    Projects.findOne(condition)
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
-    .then((project) => {
-        if(!project){
-            let err = new Error('Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }
-        let dx = -1;
-        for(let i=0;i<project.tasks.length;i++){
-            if(project.tasks[i]._id==req.params.taskId){
-                dx = i;
-                break;
-            }
-        }
-        if(dx==-1){
-            let err = new Error('Task '+req.params.taskId+' in Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }
-        project.tasks[dx].files.push({
-            path: req.file.path,
-            uploadedBy: req.user._id
-        });
-        project.save().then((project) => {
-            return Projects.findById(project._id)
-            .populate({path: 'tasks.files.uploadedBy', select: userPopulate});
-        }).then((project) => {
-            res.statusCode=200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json(project.tasks[dx].files);
-        },(err) => next(err)).catch((err) => next(err));
-    },(err) => next(err)).catch((err) => next(err));
-});
-
-router.route('/:projectId/tasks/:taskId/files/:fileId')
-.get(auth.verifyUser, (req, res, next) => {
-    let condition = {
-        _id: req.params.projectId
-    };
-    Projects.findOne(condition)
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
-    .then((project) => {
-        if(!project){
-            let err = new Error('Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }
-        let dx = -1;
-        for(let i=0;i<project.tasks.length;i++){
-            if(project.tasks[i]._id==req.params.taskId){
-                dx = i;
-                break;
-            }
-        }
-        if(dx==-1){
-            let err = new Error('Task '+req.params.taskId+' in Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }
-        let dx2=-1;
-        for(let i=0;i<project.tasks[dx].files.length;i++){
-            if(project.tasks[dx].files[i]._id==req.params.fileId){
-                dx2=i;
-                break;
-            }
-        }
-        if(dx2==-1){
-            let err = new Error('Task '+req.params.taskId+' in Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }
-        res.statusCode=200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json(project.tasks[dx].files[dx2]);
-    },(err) => next(err)).catch((err) => next(err));
-}).delete(auth.verifyUser, (req, res, next) => {
-    let condition = {
-        _id: req.params.projectId
-    };
-    Projects.findOne(condition)
-    .populate({path: 'tasks.files.uploadedBy', select: userPopulate})
-    .then((project) => {
-        if(!project){
-            let err = new Error('Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }
-        let dx = -1;
-        for(let i=0;i<project.tasks.length;i++){
-            if(project.tasks[i]._id==req.params.taskId){
-                dx = i;
-                break;
-            }
-        }
-        if(dx==-1){
-            let err = new Error('Task '+req.params.taskId+' in Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }
-        let dx2=-1;
-        for(let i=0;i<project.tasks[dx].files.length;i++){
-            if(project.tasks[dx].files[i]._id==req.params.fileId){
-                dx2=i;
-                break;
-            }
-        }
-        if(dx2==-1){
-            let err = new Error('Task '+req.params.taskId+' in Project '+req.params.projectId+' not found!');
-            err.status = 404;
-            return next(err);
-        }else if(project.tasks[dx].files[dx2].uploadedBy.id!=req.user._id){
-            let err = new Error('Forbidden');
-            err.status = 404;
-            return next(err);
-        }
-        fs.unlink(project.tasks[dx].files[dx2].path, (err) => {if(err) console.log(err)});
-        project.tasks[dx].files.splice(dx2,1);
-        project.save().then((project) => {
-            res.statusCode=200;
-            res.setHeader('Content-Type', 'application/json');
-            res.json({success: true, message: "File Deleted Successfully!"});
-        },(err) => next(err)).catch((err) => next(err));
     },(err) => next(err)).catch((err) => next(err));
 });
 

@@ -7,6 +7,7 @@ var config = require('./config');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var cors = require('cors');
+const filemanagerMiddleware = require('@opuscapita/filemanager-server').middleware;
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var userTypesRouter = require('./routes/userTypes');
@@ -30,7 +31,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/public/uploads', express.static(path.join(__dirname, 'public/uploads')));
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -42,6 +42,10 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/usertypes', userTypesRouter);
 app.use('/projects', projectsRouter);
+app.use('/files', filemanagerMiddleware({
+  fsRoot: path.resolve(__dirname, './data'),
+  rootName: 'Root'
+}));
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

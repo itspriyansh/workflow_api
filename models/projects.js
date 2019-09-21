@@ -14,22 +14,6 @@ const CommentSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const FileSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    path: {
-        type: String,
-        required: true
-    },
-    uploadedBy: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
-    }
-},{ timestamps: true });
-
 const TaskSchema = mongoose.Schema({
     name: {
         type: String,
@@ -82,8 +66,7 @@ const TaskSchema = mongoose.Schema({
         ref: 'User',
         required: true
     }],
-    comments: [CommentSchema],
-    files: [FileSchema]
+    comments: [CommentSchema]
 },{
     timestamps: true
 });
