@@ -12,6 +12,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var userTypesRouter = require('./routes/userTypes');
 var projectsRouter = require('./routes/projects');
+var resolvePath = require('./routes/resolvePath');
 
 mongoose.connect(config.mongoUrl).then(() => {
   console.log('Database Connection established!');
@@ -46,6 +47,7 @@ app.use('/files', filemanagerMiddleware({
   fsRoot: path.resolve(__dirname, './data'),
   rootName: 'Root'
 }));
+app.use('/resolve', resolvePath);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
