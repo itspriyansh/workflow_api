@@ -533,7 +533,7 @@ router.route('/:projectId/tasks/:taskId/comments')
         res.setHeader('Content-Type', 'application/json');
         res.json(project.tasks[taskIndex].comments);
     },(err) => next(err)).catch((err) => next(err));
-}).post(auth.verifyUser, (req,res,next) => {
+}).post(auth.verifyUser, auth.verifyAction('comments'), (req,res,next) => {
     let condition = {
         _id: req.params.projectId
     };
