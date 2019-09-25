@@ -49,10 +49,10 @@ router.route('/')
         users.forEach((user) => {
             dict[user.username]=user._id;
         });
-        members = [...new Set(members)];
-        req.body.members = members.map(member => dict[member]);
+        members = members.filter((member,pos) => members.indexOf(member)==pos);
+        req.body.members = members.map(member => (dict[member]==undefined?null:dict[member])).filter(member => member!=null);
         for(let i=0;i<req.body.tasks.length;i++){
-            req.body.tasks[i].members = req.body.tasks[i].members.map(member => (dict[member]==undefined?null:dict[member]));
+            req.body.tasks[i].members = req.body.tasks[i].members.map(member => (dict[member]==undefined?null:dict[member])).filter(member => member!=null);
         }
         return Projects.create(req.body);
     }).then((project) => {
@@ -210,23 +210,25 @@ router.route('/:projectId/tasks')
                 users.forEach((user) => {
                     dict[user.username]=user._id;
                 });
-                members = [...new Set(members)];
-                req.body.members = members.map(member => dict[member]);
+                members = members.filter((member,pos) => members.indexOf(member)==pos);
+                members = members.map(member => (dict[member]==undefined?null:dict[member])).filter(member => member!=null);
                 for(let i=0;i<req.body.tasks.length;i++){
-                    req.body.tasks[i].members = req.body.tasks[i].members.map(member => (dict[member]==undefined?null:dict[member]));
+                    req.body.tasks[i].members = req.body.tasks[i].members.map(member => (dict[member]==undefined?null:dict[member])).filter(member => member!=null);
                 }
                 Array.prototype.push.apply(project.tasks, req.body.tasks);
-                Array.prototype.push.apply(project.members, req.body.members);
-                project.members = [...new Set(project.members)];
+                Array.prototype.push.apply(project.members, members);
+                project.members = project.members.filter((member,pos) => project.members.indexOf(member)==pos);
+                project.markModified('members');
                 return project.save();
             }).then((project) => {
                 return Projects.findById(project._id)
+                .populate({path: 'members', select: userPopulate})
                 .populate({path: 'tasks.comments.author', select: userPopulate})
                 .populate({path: 'tasks.members', select: userPopulate});
             }).then((project) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json');
-                res.json(project.tasks);
+                res.json(project);
             },(err) => next(err)).catch((err) => next(err));
         }
     },(err) => next(err)).catch((err) => next(err));
