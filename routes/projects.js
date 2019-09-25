@@ -3,6 +3,7 @@ var Projects = require('../models/projects');
 var bodyParser = require('body-parser');
 var auth = require('../authenticate');
 var User = require('../models/users');
+var fs = require('fs');
 
 var router = express.Router();
 var userPopulate = 'name usertype username firstname lastname';
@@ -146,9 +147,11 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
         condition.members = req.user._id;;
     }
     Projects.findOneAndDelete(condition).then(() => {
-        res.statusCode=200;
-        res.setHeader('Content-Type', 'application/json');
-        res.json({success: true, message: 'Successfully deleted project '+req.params.projectId})
+      let dir = __dirname.slice(0,-7);
+      fs.unlinkSync(dir+'/'+req.params.projectId);
+      res.statusCode=200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: true, message: 'Successfully deleted project '+req.params.projectId})
     },(err) => next(err)).catch((err) => next(err));
 });
 
