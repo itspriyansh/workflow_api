@@ -120,8 +120,8 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
                 users.forEach((user) => {
                     dict[user.username]=user._id;
                 });
-                members = [...new Set(members)];
-                req.body.members = members.map(member => dict[member]);
+                members = members.filter((member,pos) => members.indexOf(member)==pos);
+                members = members.map(member => (dict[member]==undefined?null:dict[member])).filter(member => member!=null);
                 if(req.body.tasks){
                     for(let i=0;i<req.body.tasks.length;i++){
                         req.body.tasks[i].members = req.body.tasks[i].members.map(member => (dict[member]==undefined?null:dict[member]));
@@ -130,6 +130,10 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
                 for(let key in req.body){
                     project[key] = req.body[key];
                 }
+                Array.prototype.push.apply(project.members, members);
+                project.members.filter((member,pos) => {
+                    project.members.indexOf(member)==pos;
+                });
                 return project.save();
             }).then((project) => {
                 Projects.findById(project._id)
