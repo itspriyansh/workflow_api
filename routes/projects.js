@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var auth = require('../authenticate');
 var User = require('../models/users');
 var fs = require('fs');
+var rimraf = require('rimraf');
 
 var router = express.Router();
 var userPopulate = 'name usertype username firstname lastname';
@@ -148,7 +149,9 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
     }
     Projects.findOneAndDelete(condition).then(() => {
       let dir = __dirname.slice(0,-7);
-      fs.unlinkSync(dir+'/'+req.params.projectId);
+      if(fs.existsSync(dir+'/data/'+req.params.projectId)){
+        rimraf.sync(dir+'/data/'+req.params.projectId);
+      }
       res.statusCode=200;
       res.setHeader('Content-Type', 'application/json');
       res.json({success: true, message: 'Successfully deleted project '+req.params.projectId})
