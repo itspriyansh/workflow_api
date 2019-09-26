@@ -122,8 +122,10 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
                 });
                 members = [...new Set(members)];
                 req.body.members = members.map(member => dict[member]);
-                for(let i=0;i<req.body.tasks.length;i++){
-                    req.body.tasks[i].members = req.body.tasks[i].members.map(member => (dict[member]==undefined?null:dict[member]));
+                if(req.body.tasks){
+                    for(let i=0;i<req.body.tasks.length;i++){
+                        req.body.tasks[i].members = req.body.tasks[i].members.map(member => (dict[member]==undefined?null:dict[member]));
+                    }
                 }
                 for(let key in req.body){
                     project[key] = req.body[key];
