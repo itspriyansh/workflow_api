@@ -100,17 +100,19 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
                 project.fat_date = req.body.fat_date;
             }
             let members=[];
-            for(let i=0;i<req.body.tasks.length;i++){
-                if(req.body.tasks[i].start_date==undefined){
-                    req.body.tasks[i].start_date = project.start_date;
+            if(req.body.tasks){
+                for(let i=0;i<req.body.tasks.length;i++){
+                    if(req.body.tasks[i].start_date==undefined){
+                        req.body.tasks[i].start_date = project.start_date;
+                    }
+                    if(req.body.tasks[i].end_date==undefined){
+                        req.body.tasks[i].end_date = project.fat_date;
+                    }
+                    if(req.body.tasks[i].members==undefined){
+                        req.body.tasks[i].members=[];
+                    }
+                    Array.prototype.push.apply(members, req.body.tasks[i].members);
                 }
-                if(req.body.tasks[i].end_date==undefined){
-                    req.body.tasks[i].end_date = project.fat_date;
-                }
-                if(req.body.tasks[i].members==undefined){
-                    req.body.tasks[i].members=[];
-                }
-                Array.prototype.push.apply(members, req.body.tasks[i].members);
             }
             User.find({username: members}).select('_id username')
             .then((users) => {
