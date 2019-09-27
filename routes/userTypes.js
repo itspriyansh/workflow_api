@@ -22,15 +22,16 @@ router.get('/', (req, res, next) => {
           location_enable: true,
           location_view: true,
           comments: true,
-          chat: true,
-          download: true,
+          file_access: true,
+          download: true
       });
     }if(!found[1]){
       UserType.create({
           name: 'Data Entry',
           location_enable: true,
           upload: true,
-          chat: true,
+          file_access: true,
+          chat: true
       });
     }if(!found[2]){
       UserType.create({
@@ -40,7 +41,7 @@ router.get('/', (req, res, next) => {
           upload: true,
           comments: true,
           data_entry: true,
-          chat: true,
+          file_access: true,
           offer_details: true
       });
     }if(!found[3]){
@@ -48,7 +49,7 @@ router.get('/', (req, res, next) => {
           name: 'GB',
           location_view: true,
           comments: true,
-          chat: true,
+          file_access: true,
           offer_details: true
       });
     }

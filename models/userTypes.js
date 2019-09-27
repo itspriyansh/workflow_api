@@ -25,7 +25,7 @@ const UserType = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    chat: {
+    file_access: {
         type: Boolean,
         default: false
     },
