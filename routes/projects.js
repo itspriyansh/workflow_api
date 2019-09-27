@@ -487,7 +487,7 @@ router.route('/:projectId/tasks/:taskId/members/:memberId')
                     let letsDelete = true;
                     for(let j=0;j<project.tasks.length;j++){
                         if(j==taskIndex) continue;
-                        if(project.tasks[j].members.filter(member => member._id==id)){
+                        if(project.tasks[j].members.filter(member => member._id==id).length>0){
                             letsDelete = false;
                             break;
                         }
