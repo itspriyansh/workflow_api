@@ -4,7 +4,7 @@ var fs = require('fs');
 
 var router = express.Router();
 
-router.post('/', auth.verifyUser, auth.verifyAction('upload'), (req, res) => {
+router.post('/', auth.verifyUser, (req, res) => {
   let pathArr = req.body.path.split('/');
   let pathStr = __dirname.slice(0,-7);
   pathArr.forEach(p => {
