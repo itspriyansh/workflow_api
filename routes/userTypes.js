@@ -31,7 +31,8 @@ router.get('/', (req, res, next) => {
           location_enable: true,
           upload: true,
           file_access: true,
-          chat: true
+          chat: true,
+          admin: true
       });
     }if(!found[2]){
       UserType.create({
@@ -42,6 +43,7 @@ router.get('/', (req, res, next) => {
           comments: true,
           data_entry: true,
           file_access: true,
+          admin: true,
           offer_details: true
       });
     }if(!found[3]){
@@ -50,7 +52,8 @@ router.get('/', (req, res, next) => {
           location_view: true,
           comments: true,
           file_access: true,
-          offer_details: true
+          offer_details: true,
+          admin: true
       });
     }
     return;
@@ -63,7 +66,7 @@ router.get('/', (req, res, next) => {
     })
   }).catch((err) => next(err));
 });
-router.put('/', auth.verifyUser, auth.verifyAction('upload'), (req,res,next) => {
+router.put('/', auth.verifyUser, auth.verifyAction('admin'), (req,res,next) => {
   async.eachSeries(req.body.usertypes, function updateObject(type,done) {
     UserType.findOneAndUpdate({name: type.name},type,done);
   }, function allDone(err){

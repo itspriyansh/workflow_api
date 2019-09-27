@@ -13,7 +13,7 @@ router.use(bodyParser.json());
 router.route('/')
 .get(auth.verifyUser, (req, res, next) => {
     let condition={};
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     }
     Projects.find(condition)
@@ -25,7 +25,7 @@ router.route('/')
         res.setHeader('Content-Type', 'application/json');
         res.json(projects);
     }, (err) => next(err)).catch((err) => next(err));
-}).post(auth.verifyUser, auth.verifyAction('upload'), (req, res, next) => {
+}).post(auth.verifyUser, auth.verifyAction('admin'), (req, res, next) => {
     if(req.body.tasks==undefined){
         req.body.tasks = [];
     }
@@ -67,7 +67,7 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;;
     }
     Projects.findOne(condition)
@@ -83,7 +83,7 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;;
     }
     Projects.findOne(condition)
@@ -148,11 +148,11 @@ router.route('/:projectId').get(auth.verifyUser, (req, res, next) => {
             },(err) => next(err)).catch((err) => next(err));
         }
     },(err) => next(err)).catch((err) => next(err));
-}).delete(auth.verifyUser, auth.verifyAction('upload'), (req, res, next) => {
+}).delete(auth.verifyUser, auth.verifyAction('admin'), (req, res, next) => {
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;;
     }
     Projects.findOneAndDelete(condition).then(() => {
@@ -171,7 +171,7 @@ router.route('/:projectId/tasks')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -192,7 +192,7 @@ router.route('/:projectId/tasks')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -250,7 +250,7 @@ router.route('/:projectId/tasks/:taskId')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -271,7 +271,7 @@ router.route('/:projectId/tasks/:taskId')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -311,7 +311,7 @@ router.route('/:projectId/tasks/:taskId')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -349,7 +349,7 @@ router.route('/:projectId/tasks/:taskId/members')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -414,7 +414,7 @@ router.route('/:projectId/tasks/:taskId/members/:memberId')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -455,7 +455,7 @@ router.route('/:projectId/tasks/:taskId/members/:memberId')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)
@@ -522,7 +522,7 @@ router.route('/:projectId/tasks/:taskId/comments')
     let condition = {
         _id: req.params.projectId
     };
-    if(!req.user.type.upload){
+    if(!req.user.type.admin){
         condition.members = req.user._id;
     };
     Projects.findOne(condition)

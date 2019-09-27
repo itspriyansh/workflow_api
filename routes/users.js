@@ -32,7 +32,7 @@ router.post('/signup', (req, res) => {
   });
 });
 
-router.post('/adduser', auth.verifyUser, auth.verifyAction('upload'), (req, res) => {
+router.post('/adduser', auth.verifyUser, auth.verifyAction('admin'), (req, res) => {
   if(!req.body.lastname){
     req.body.lastname=''
   }
