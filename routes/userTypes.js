@@ -9,12 +9,13 @@ router.use(bodyParser.json());
 
 router.get('/', (req, res, next) => {
   UserType.find().then(types => {
-    found = [false,false,false,false];
+    found = [false,false,false,false,false];
     types.forEach(type => {
       if(type.name=='User Operator') found[0]=true;
       else if(type.name=='Data Entry') found[1]=true;
       else if(type.name=='Review') found[2]=true;
       else if(type.name=='GB') found[3]=true;
+      else if(type.name=='Admin') found[4]=true;
     });
     if(!found[0]){
       UserType.create({
@@ -31,8 +32,7 @@ router.get('/', (req, res, next) => {
           location_enable: true,
           upload: true,
           file_access: true,
-          chat: true,
-          admin: true
+          chat: true
       });
     }if(!found[2]){
       UserType.create({
@@ -43,7 +43,6 @@ router.get('/', (req, res, next) => {
           comments: true,
           data_entry: true,
           file_access: true,
-          admin: true,
           offer_details: true
       });
     }if(!found[3]){
@@ -52,8 +51,20 @@ router.get('/', (req, res, next) => {
           location_view: true,
           comments: true,
           file_access: true,
-          offer_details: true,
-          admin: true
+          offer_details: true
+      });
+    }if(!found[4]){
+      UserType.create({
+        name: 'Admin',
+        location_enable: true,
+        location_view: true,
+        upload: true,
+        comments: true,
+        data_entry: true,
+        file_access: true,
+        admin: true,
+        download: true,
+        offer_details: true
       });
     }
     return;

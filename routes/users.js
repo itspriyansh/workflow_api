@@ -83,4 +83,36 @@ router.get('/verify', auth.verifyUser, (req, res, next) => {
   res.json({valid: true});
 });
 
+router.get('/list', auth.verifyUser, auth.verifyAction('admin'), (req,res,next) => {
+  User.find()
+  .populate('type')
+  .then(users => {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json(users);
+  }).catch(err => next(err));
+});
+
+router.route('/list/:userId').get(auth.verifyUser, auth.verifyAction('admin'), (req,res,next) => {
+  User.findById(req.params.userId).populate('type').then(user => {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json(user);
+  }).catch(err => next(err));
+}).put(auth.verifyUser, auth.verifyAction('admin'), (req,res,next) => {
+  User.findByIdAndUpdate(req.params.userId, req.body, {new: true})
+  .populate('type').then(user => {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json(user);
+  }).catch(err => next(err));
+}).delete(auth.verifyUser, auth.verifyAction('admin'), (req,res,next) => {
+  User.findByIdAndDelete(req.params.userId)
+  .then(() => {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({success: true});
+  }).catch(err => next(err));
+});
+
 module.exports = router;
