@@ -32,6 +32,40 @@ router.post('/signup', (req, res) => {
   });
 });
 
+router.put('/edit-self', auth.verifyUser, (req,res,next) => {
+  let updateObject={};
+  if(req.body.firstname && req.body.firstname!="") updateObject.firstname=req.body.firstname;
+  if(req.body.lastname && req.body.lastname!="") updateObject.lastname=req.body.lastname;
+  if(req.body.usertype && req.body.usertype!="") updateObject.usertype=req.body.usertype;
+  if(req.body.email && req.body.email!="") updateObject.username=req.body.email;
+  User.findByIdAndUpdate(req.user._id, updateObject, {useFindAndModify: true, new: true})
+  .populate('type').then(user => {
+    if(req.body.oldPassword && req.body.oldPassword!="" && req.body.newPassword && req.body.newPassword!=""){
+      req.user.changePassword(req.body.oldPassword, req.body.newPassword,(err,userAfterPassChange) => {
+        if(err){
+          res.statusCode=200;
+          res.setHeader('Content-Type', 'application/json');
+          res.json({success: true, user: user});
+          return;
+        }
+        User.findById(userAfterPassChange._id).populate('type').then(user => {
+          res.statusCode=200;
+          res.setHeader('Content-Type', 'application/json');
+          res.json({success: true, user: user});
+        });
+      });
+    }else{
+      res.statusCode=200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: true, user: user});
+    }
+},(err) => {
+    res.statusCode=500;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({success: false, error: err});
+  });
+});
+
 router.post('/adduser', auth.verifyUser, auth.verifyAction('admin'), (req, res) => {
   if(!req.body.lastname){
     req.body.lastname=''
