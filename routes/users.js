@@ -32,7 +32,7 @@ router.post('/signup', (req, res) => {
   });
 });
 
-router.put('/edit-self', auth.verifyUser, (req,res,next) => {
+router.put('/edit-proile', auth.verifyUser, (req,res,next) => {
   let updateObject={};
   if(req.body.firstname && req.body.firstname!="") updateObject.firstname=req.body.firstname;
   if(req.body.lastname && req.body.lastname!="") updateObject.lastname=req.body.lastname;
