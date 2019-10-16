@@ -32,7 +32,7 @@ router.post('/signup', (req, res) => {
   });
 });
 
-router.put('/edit-proile', auth.verifyUser, (req,res,next) => {
+router.put('/edit-profile', auth.verifyUser, (req,res,next) => {
   let updateObject={};
   if(req.body.firstname && req.body.firstname!="") updateObject.firstname=req.body.firstname;
   if(req.body.lastname && req.body.lastname!="") updateObject.lastname=req.body.lastname;
@@ -64,6 +64,26 @@ router.put('/edit-proile', auth.verifyUser, (req,res,next) => {
     res.setHeader('Content-Type', 'application/json');
     res.json({success: false, error: err});
   });
+});
+
+router.put('/resetPassword', auth.verifyUser, (req,res,next) => {
+  if(req.body.oldPassword && req.body.oldPassword!="" && req.body.newPassword && req.body.newPassword!=""){
+    req.user.changePassword(req.body.oldPassword, req.body.newPassword,(err,userAfterPassChange) => {
+      if(err){
+        res.statusCode=500;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({success: false, err: err});
+        return;
+      }
+      res.statusCode=200;
+      res.setHeader('Content-Type', 'application/json');
+      res.json({success: true, message: "Password Changed Successfully..."});
+    });
+  }else{
+    res.statusCode=500;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({success: false, err: new Error('Empty password fields!')});
+  }
 });
 
 router.post('/adduser', auth.verifyUser, auth.verifyAction('admin'), (req, res) => {
