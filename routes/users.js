@@ -40,30 +40,10 @@ router.put('/edit-profile', auth.verifyUser, (req,res,next) => {
   if(req.body.email && req.body.email!="") updateObject.username=req.body.email;
   User.findByIdAndUpdate(req.user._id, updateObject, {useFindAndModify: true, new: true})
   .populate('type').then(user => {
-    if(req.body.oldPassword && req.body.oldPassword!="" && req.body.newPassword && req.body.newPassword!=""){
-      req.user.changePassword(req.body.oldPassword, req.body.newPassword,(err,userAfterPassChange) => {
-        if(err){
-          res.statusCode=200;
-          res.setHeader('Content-Type', 'application/json');
-          res.json({success: true, user: user});
-          return;
-        }
-        User.findById(userAfterPassChange._id).populate('type').then(user => {
-          res.statusCode=200;
-          res.setHeader('Content-Type', 'application/json');
-          res.json({success: true, user: user});
-        });
-      });
-    }else{
-      res.statusCode=200;
-      res.setHeader('Content-Type', 'application/json');
-      res.json({success: true, user: user});
-    }
-},(err) => {
-    res.statusCode=500;
+    res.statusCode=200;
     res.setHeader('Content-Type', 'application/json');
-    res.json({success: false, error: err});
-  });
+    res.json({user: user});
+  },(err) => next(err));
 });
 
 router.put('/resetPassword', auth.verifyUser, (req,res,next) => {
@@ -166,7 +146,11 @@ router.route('/list/:userId').get(auth.verifyUser, auth.verifyAction('admin'), (
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.json({success: true});
-  }).catch(err => next(err));
+  }).catch(err => {
+    res.statusCode = err.status;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({success: false, message: err.message});
+  });
 });
 
 module.exports = router;
