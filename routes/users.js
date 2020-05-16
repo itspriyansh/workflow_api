@@ -14,7 +14,7 @@ router.get('/', auth.verifyUser, function(req, res) {
   },(err) => next(err)).catch((err) => next(err));
 });
 
-/* router.post('/signup', (req, res) => {
+router.post('/signup', (req, res) => {
   if(!req.body.lastname){
     req.body.lastname=''
   }
@@ -30,7 +30,7 @@ router.get('/', auth.verifyUser, function(req, res) {
       res.json({success: true, status: 'Registration Successful!', token: auth.getToken({_id: user._id})});
     }
   });
-}); */
+});
 
 router.put('/edit-profile', auth.verifyUser, (req,res,next) => {
   let updateObject={};
